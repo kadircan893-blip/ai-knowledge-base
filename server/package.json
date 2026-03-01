@@ -1,0 +1,9 @@
+{
+  "name": "ai-knowledge-base-server",
+  "version": "0.0.0",
+  "type": "commonjs",
+  "private": true,
+  "dependencies": {
+    "groq-sdk": "^0.37.0"
+  }
+}
