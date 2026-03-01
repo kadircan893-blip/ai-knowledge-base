@@ -2,6 +2,10 @@
 
 A full-stack, multi-user knowledge management application with AI-powered chat, semantic search, and offline support. Built with React, TypeScript, Express, and SQLite — wrapped in a glassmorphism UI.
 
+## 🌐 Live Demo ; 
+
+ai-knowledge-base-production-e2ff.up.railway.app
+
 ---
 
 ## Table of Contents
