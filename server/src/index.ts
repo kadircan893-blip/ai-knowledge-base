@@ -3,6 +3,7 @@ dotenv.config();   // must be first — loads GROQ_API_KEY before any import use
 
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { authRouter } from './routes/auth';
 import { notesRouter } from './routes/notes';
 import { categoriesRouter } from './routes/categories';
@@ -12,12 +13,15 @@ import { aiRouter } from './routes/ai';
 // Import database (runs schema migration on startup)
 import './database';
 
-const app  = express();
-const PORT = process.env.PORT ?? 3001;
-const AI   = !!process.env.GROQ_API_KEY?.trim();
+const app        = express();
+const PORT       = process.env.PORT ?? 3001;
+const AI         = !!process.env.GROQ_API_KEY?.trim();
+const PROD       = process.env.NODE_ENV === 'production';
 
 // ── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:4173'] }));
+app.use(cors({
+  origin: PROD ? true : ['http://localhost:5173', 'http://localhost:4173'],
+}));
 app.use(express.json());
 
 // ── Routes ────────────────────────────────────────────────────────────────────
@@ -31,10 +35,18 @@ app.use('/api/categories', categoriesRouter);
 app.use('/api/chat',       chatRouter);
 app.use('/api/ai',         aiRouter);
 
-// ── 404 catch-all ─────────────────────────────────────────────────────────────
-app.use((_req, res) => {
-  res.status(404).json({ error: 'Not found' });
-});
+// ── Serve frontend in production ───────────────────────────────────────────────
+if (PROD) {
+  const distPath = path.resolve(process.cwd(), 'dist');
+  app.use(express.static(distPath));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+} else {
+  app.use((_req, res) => {
+    res.status(404).json({ error: 'Not found' });
+  });
+}
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
