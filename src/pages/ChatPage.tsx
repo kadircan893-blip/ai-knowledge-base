@@ -3,6 +3,7 @@ import { Send, Bot, User, Sparkles, Lightbulb, BookOpen, Zap, ZapOff } from 'luc
 import { useQueryCount } from '../hooks/useQueryCount';
 import MarkdownContent from '../components/ui/MarkdownContent';
 import { loadAiModel } from '../utils/noteStorage';
+import { getToken } from '../utils/authStorage';
 import type { ChatMessage, Note } from '../types';
 
 interface ChatPageProps {
@@ -75,7 +76,9 @@ export default function ChatPage({ notes }: ChatPageProps) {
 
   // Check AI availability on mount
   useEffect(() => {
-    fetch('/api/chat/status')
+    fetch('/api/chat/status', {
+      headers: { Authorization: `Bearer ${getToken() ?? ''}` },
+    })
       .then((r) => r.json())
       .then((d: { aiAvailable: boolean }) => setAiAvailable(d.aiAvailable))
       .catch(() => setAiAvailable(false));
@@ -127,7 +130,10 @@ export default function ChatPage({ notes }: ChatPageProps) {
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken() ?? ''}`,
+        },
         body: JSON.stringify({ message: msg, history, model: loadAiModel() }),
       });
 
